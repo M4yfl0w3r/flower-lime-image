@@ -16,7 +16,6 @@ image = Image.open(test_image_path)
 # pyplot.axis('off')
 # pyplot.show()
 
-explainer = ImageExplainer()
-dataset = explainer.generate_dataset(image = np.array(image),
-                                     num_samples = 100)
+explainer = ImageExplainer(np.array(image))
+dataset = explainer.generate_dataset(num_samples = 100)
 
