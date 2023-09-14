@@ -1,6 +1,7 @@
 import numpy as np 
 import matplotlib.pyplot as pyplot
 
+from typing import Callable
 from scipy.stats import bernoulli
 from skimage.segmentation import quickshift
 from skimage.segmentation import mark_boundaries 
@@ -8,8 +9,9 @@ from skimage.segmentation import mark_boundaries
 
 class ImageExplainer:
 
-    def __init__(self, image):
+    def __init__(self, image: np.ndarray, prediction_fn: Callable[[np.ndarray], np.ndarray]):
         self.image = image 
+        self.prediction_fn = prediction_fn
 
     def generate_dataset(self, num_samples: int) -> np.ndarray:
         """Function that generates a new dataset that will be used to train a simple linear model."""
@@ -34,7 +36,6 @@ class ImageExplainer:
             pyplot.imshow(image)
             pyplot.axis('off')
             pyplot.show()
-                
 
     def show_superpixels_boundaries(self, superpixels: np.ndarray) -> None:
         boundaries: np.ndarray = mark_boundaries(self.image, superpixels)
