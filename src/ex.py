@@ -12,10 +12,6 @@ from lime_image import ImageExplainer
 test_image_path = Path('../assets/test_img.jpg')
 image = Image.open(test_image_path)
 
-# pyplot.imshow(image)
-# pyplot.axis('off')
-# pyplot.show()
-
 explainer = ImageExplainer(np.array(image))
-dataset = explainer.generate_dataset(num_samples = 100)
+dataset = explainer.generate_dataset(num_samples = 2)
 
