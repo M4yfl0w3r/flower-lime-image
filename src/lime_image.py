@@ -9,9 +9,9 @@ from skimage.segmentation import mark_boundaries
 
 class ImageExplainer:
 
-    def __init__(self, image: np.ndarray, prediction_fn: Callable[[np.ndarray], np.ndarray]):
+    def __init__(self, image: np.ndarray, classifier_fn: Callable[[np.ndarray], np.ndarray]):
         self.image = image 
-        self.prediction_fn = prediction_fn
+        self.classifier_fn = classifier_fn
 
     def generate_dataset(self, num_samples: int) -> np.ndarray:
         """Function that generates a new dataset that will be used to train a simple linear model."""
@@ -32,14 +32,10 @@ class ImageExplainer:
 
             generated_dataset.append(image_with_masked_superpixels)
 
-        for image in generated_dataset:
-            pyplot.imshow(image)
-            pyplot.axis('off')
-            pyplot.show()
+        return generated_dataset
 
     def show_superpixels_boundaries(self, superpixels: np.ndarray) -> None:
         boundaries: np.ndarray = mark_boundaries(self.image, superpixels)
         pyplot.imshow(boundaries)
         pyplot.axis('off')
         pyplot.show()
-        
