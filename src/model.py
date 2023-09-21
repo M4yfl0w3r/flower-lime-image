@@ -40,3 +40,4 @@ class CNN(nn.Module):
         output = self.classification(output)
 
         return output
+

@@ -20,7 +20,7 @@ model = CNN()
 model.load_state_dict(torch.load(str(model_path), map_location = torch.device('cpu')))
 
 @torch.no_grad()
-def batch_predict(image: np.ndarray) -> np.array:
+def batch_predict(image: np.ndarray) -> np.ndarray:
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor()
@@ -36,6 +36,4 @@ def batch_predict(image: np.ndarray) -> np.array:
 
 
 explainer = ImageExplainer(np.array(image), batch_predict)
-dataset = explainer.generate_dataset(num_samples = 100)
-weights = explainer.calculate_weights()
-explainer.train_linear_model()
+explainer.explain(num_samples = 1, num_features = 5)
