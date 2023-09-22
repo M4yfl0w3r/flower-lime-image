@@ -13,10 +13,11 @@ from lime_image import ImageExplainer
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 test_image_path = Path('../assets/test_img_2.jpg')
+model_path = Path('../assets/model.pth')
+
 image = Image.open(test_image_path)
 image = image.resize((224, 224))
 
-model_path = Path('../assets/model.pth')
 model = CNN()
 model.load_state_dict(torch.load(str(model_path), map_location = torch.device('cpu')))
 
@@ -33,14 +34,21 @@ def batch_predict(image: np.ndarray) -> np.ndarray:
     image: torch.Tensor = image.unsqueeze(0)
 
     logits: torch.Tensor = model(image)
-    probs: torch.Tensor = F.softmax(logits, dim = 1)
+    probs:  torch.Tensor = F.softmax(logits, dim = 1)
     return probs.detach().cpu().numpy()
 
+classes: dict[int, str] = { 0 : 'glioma', 
+                            1 : 'meningioma', 
+                            2 : 'notumor', 
+                            3 : 'pituitary' }
+
+original_image_label: np.ndarray = batch_predict(np.array(image)).argmax()
 
 explainer = ImageExplainer(image = np.array(image), 
                            classifier_fn = batch_predict,
                            num_classes = 4,
-                           num_samples = 100)
+                           num_samples = 10,
+                           num_features = 5)
 
-explainer.explain(num_features = 2)
+explainer.explain()
 explainer.show_explanation()

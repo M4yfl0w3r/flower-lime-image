@@ -15,51 +15,67 @@ class ImageExplainer:
                  image: np.ndarray, 
                  classifier_fn: Callable[[np.ndarray], np.ndarray], 
                  num_samples: int,
-                 num_classes: int):
-        
+                 num_classes: int,
+                 num_features: int):
         self.image = image
         self.classifier_fn = classifier_fn
-
-        self.model_weights = [] 
-        self.perturbations_images = []
-        self.interpretable_features = []
-
         self.num_samples = num_samples
-        
-        self.predictions = []
-        self.num_superpixels: int = 0
-        self.superpixels: list = []
-        self.explanation: np.ndarray = np.zeros(shape = self.image.shape)
+        self.num_classes = num_classes
+        self.num_features = num_features
+        self.num_superpixels: int = 20
+        self.top_label: int = 0
 
-    def explain(self, num_features: int) -> None:
-        self.generate_dataset(self.num_samples)
+        self.interpretable_features: np.ndarray = np.empty(shape = (self.num_samples, self.num_superpixels))
+        self.predictions: np.ndarray = np.empty(shape = (self.num_samples, self.num_classes))
+        self.perturbations: np.ndarray = np.empty(shape = (self.num_samples))
+        self.model_weights: np.ndarray = np.empty(shape = self.num_samples) 
+        self.explanation: np.ndarray = np.empty(shape = self.image.shape)
+
+    def explain(self) -> None:
+        self.generate_dataset()
         self.calculate_weights()
-        self.train_linear_model(num_features)
+        self.train_linear_model()
 
-    def generate_dataset(self, num_samples: int) -> None:
+    def generate_dataset(self) -> None:
         """Function that generates a new dataset that will be used to train the simple linear model."""
         
-        self.superpixels: np.ndarray = quickshift(self.image, kernel_size = 6, ratio = 0.2, max_dist = 200)
-        self.num_superpixels: int = np.unique(self.superpixels).shape[0]
+        self.superpixels = quickshift(self.image, kernel_size = 5, ratio = 0.2, max_dist = 200)
+        self.num_superpixels = np.unique(self.superpixels).shape[0]
         replacement_color: int = 170
 
         def _mask_random_superpixels(interpretable_features: np.ndarray) -> np.ndarray:
             image_with_masked_superpixels: np.ndarray = np.copy(self.image)
 
             for superpixel in range(self.num_superpixels):
-                if interpretable_features[0][superpixel] == 0:
+                if interpretable_features[superpixel] == 0:
                     superpixel_mask: np.ndarray = (self.superpixels == superpixel)
                     image_with_masked_superpixels[superpixel_mask] = replacement_color
 
             return image_with_masked_superpixels
 
-        for _ in range(num_samples):
-            self.interpretable_features = bernoulli.rvs(p = 0.5, size = (num_samples, self.num_superpixels))
-            image_with_masked_superpixels: np.ndarray = _mask_random_superpixels(self.interpretable_features)
-            prediction: np.ndarray = self.classifier_fn(image_with_masked_superpixels)
+        perturbations = []
+        predictions = []
+        features = []
+        labels = []
 
-            self.predictions.append(prediction)
-            self.perturbations_images.append(image_with_masked_superpixels)
+        for _ in range(self.num_samples):
+            feature: np.ndarray = bernoulli.rvs(p = 0.5, size = self.num_superpixels)
+            image_with_masked_superpixels: np.ndarray = _mask_random_superpixels(feature)
+            prediction: np.ndarray = self.classifier_fn(image_with_masked_superpixels)
+            label: int = prediction.argmax()
+
+            labels.append(label)
+            features.append(feature)
+            predictions.append(prediction)
+            perturbations.append(image_with_masked_superpixels)
+
+        unique_elements, counts = np.unique(labels, return_counts = True)
+        most_common_value = unique_elements[np.argmax(counts)]
+
+        self.top_label = most_common_value
+        self.interpretable_features = np.array(features)
+        self.predictions = np.array(predictions)
+        self.perturbations = np.array(perturbations)
 
     def calculate_weights(self) -> None:
         """Function that calculates the simple linear model weights based on differences between original
@@ -71,28 +87,18 @@ class ImageExplainer:
         
         self.model_weights = np.sqrt(np.exp(-(distances ** 2) / .25 ** 2))
 
-    def train_linear_model(self, num_features: int) -> None:
+    def train_linear_model(self) -> None:
         """Train the simple linear model to see which superpixels are the most important."""
         
         model = Ridge()
-
-        y = []
         
-        # TODO: Get the top label
-        label = 2 # TODO: 
-
-        # TODO: numpy function
-        for prediction in self.predictions:
-            y.append(prediction[0][label])
-
-        x = self.interpretable_features
-        y = np.array(y)
-        
-        model.fit(x, y, sample_weight = self.model_weights)
+        model.fit(X = self.interpretable_features,
+                  y = self.predictions[:, :, self.top_label].flatten(), 
+                  sample_weight = self.model_weights)
 
         def _mark_most_active_superpixels() -> np.ndarray:
             mask: np.ndarray = np.zeros(self.num_superpixels)
-            most_active_superpixels: np.ndarray = np.argsort(model.coef_)[-num_features:]
+            most_active_superpixels: np.ndarray = np.argsort(model.coef_)[-self.num_features:]
             mask[most_active_superpixels] = True
             image_with_masked_superpixels: np.ndarray = np.copy(self.image)
 
@@ -105,7 +111,7 @@ class ImageExplainer:
         
         self.explanation = _mark_most_active_superpixels()
 
-    def show_explanation(self):
+    def show_explanation(self) -> None:
         _, (ax1, ax2) = pyplot.subplots(1, 2)
 
         ax1.imshow(self.image)
