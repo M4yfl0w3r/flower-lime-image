@@ -1,4 +1,11 @@
 .venv
+
 src/__pycache__
+src/test_*
+
 assets/model.pth
 assets/transfer.pth
+assets/test_model.ipynb
+assets/test_img_2.jpg
+
+tests/

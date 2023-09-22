@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-import matplotlib.pyplot as pyplot
+import torch.nn.functional as F
 
 from PIL import Image
 from pathlib import Path
@@ -12,8 +12,9 @@ from lime_image import ImageExplainer
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-test_image_path = Path('../assets/test_img.jpg')
+test_image_path = Path('../assets/test_img_2.jpg')
 image = Image.open(test_image_path)
+image = image.resize((224, 224))
 
 model_path = Path('../assets/model.pth')
 model = CNN()
@@ -31,9 +32,15 @@ def batch_predict(image: np.ndarray) -> np.ndarray:
     image: torch.Tensor = image.to(device)
     image: torch.Tensor = image.unsqueeze(0)
 
-    output: torch.Tensor = model(image)
-    return output.data.cpu().numpy()
+    logits: torch.Tensor = model(image)
+    probs: torch.Tensor = F.softmax(logits, dim = 1)
+    return probs.detach().cpu().numpy()
 
 
-explainer = ImageExplainer(np.array(image), batch_predict)
-explainer.explain(num_samples = 1, num_features = 5)
+explainer = ImageExplainer(image = np.array(image), 
+                           classifier_fn = batch_predict,
+                           num_classes = 4,
+                           num_samples = 100)
+
+explainer.explain(num_features = 2)
+explainer.show_explanation()
