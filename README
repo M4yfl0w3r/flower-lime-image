@@ -1,5 +1,0 @@
-Python implementation of LIME (Local Interpretable Model-Agnostic Explanations) for images.
-
-References
-- https://arxiv.org/abs/2102.06307
-- https://arxiv.org/abs/1602.04938 
