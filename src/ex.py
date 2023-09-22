@@ -8,6 +8,7 @@ from torchvision import transforms
 
 from model import CNN
 from lime_image import ImageExplainer
+from lime_image import Params
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -42,13 +43,12 @@ classes: dict[int, str] = { 0 : 'glioma',
                             2 : 'notumor', 
                             3 : 'pituitary' }
 
-original_image_label: np.ndarray = batch_predict(np.array(image)).argmax()
+params = Params()
 
-explainer = ImageExplainer(image = np.array(image), 
-                           classifier_fn = batch_predict,
-                           num_classes = 4,
-                           num_samples = 10,
-                           num_features = 5)
+params.image = np.array(image)
+params.classes = classes
+params.classifier_fn = batch_predict
 
+explainer = ImageExplainer(params)
 explainer.explain()
 explainer.show_explanation()
