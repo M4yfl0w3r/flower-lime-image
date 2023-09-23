@@ -20,7 +20,7 @@ image = Image.open(test_image_path)
 image = image.resize((224, 224))
 
 model = CNN()
-model.load_state_dict(torch.load(str(model_path), map_location = torch.device('cpu')))
+model.load_state_dict(torch.load(str(model_path), map_location = device))
 
 @torch.no_grad()
 def batch_predict(image: np.ndarray) -> np.ndarray:
