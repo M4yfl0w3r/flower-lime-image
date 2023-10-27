@@ -1,13 +1,15 @@
 import numpy as np 
-import matplotlib.pyplot as pyplot
+import matplotlib.pyplot as pl
 
 from typing import Callable
 from scipy.stats import bernoulli
 from sklearn.metrics import pairwise_distances
 from sklearn.linear_model import Ridge
-from skimage.segmentation import quickshift
-from skimage.segmentation import mark_boundaries 
 
+from skimage.segmentation import (
+    quickshift,
+    mark_boundaries 
+)
 
 class Params:
     image: np.ndarray = None
@@ -124,7 +126,7 @@ class ImageExplainer:
         self.explanation = _mark_most_active_superpixels()
 
     def show_explanation(self) -> None:
-        fig, (ax1, ax2) = pyplot.subplots(1, 2)
+        fig, (ax1, ax2) = pl.subplots(1, 2)
 
         fig.suptitle(f'Explained class: {self.params.classes[self.top_label]}')
 
@@ -136,10 +138,10 @@ class ImageExplainer:
         ax2.set_title('Explanation \n (Most active superpixels)')
         ax2.axis('off')
 
-        pyplot.show()
+        pl.show()
 
     def show_superpixels_boundaries(self, superpixels: np.ndarray) -> None:
         boundaries: np.ndarray = mark_boundaries(self.params.image, superpixels)
-        pyplot.imshow(boundaries)
-        pyplot.axis('off')
-        pyplot.show()
+        pl.imshow(boundaries)
+        pl.axis('off')
+        pl.show()

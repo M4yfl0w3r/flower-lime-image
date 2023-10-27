@@ -7,8 +7,11 @@ from pathlib import Path
 from torchvision import transforms
 
 from model import CNN
-from lime_image import ImageExplainer
-from lime_image import Params
+
+from lime_image import (
+    ImageExplainer,
+    Params
+)
 
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
