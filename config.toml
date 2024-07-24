@@ -1,0 +1,11 @@
+[lime]
+num_samples = 200
+num_classes = 4
+num_features = 2
+replacement_color = 170
+kernel_width = 0.25
+
+[lime.quickshift]
+kernel_size = 3
+ratio = 0.2
+max_dist = 200

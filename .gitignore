@@ -7,5 +7,6 @@ assets/model.pth
 assets/transfer.pth
 assets/test_model.ipynb
 assets/test_img_2.jpg
+assets/test_meningioma.jpg
 
 tests/

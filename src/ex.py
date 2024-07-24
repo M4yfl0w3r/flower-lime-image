@@ -16,7 +16,7 @@ from lime_image import (
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-test_image_path = Path('../assets/test_img_2.jpg')
+test_image_path = Path('../assets/test_meningioma.jpg')
 model_path = Path('../assets/model.pth')
 
 image = Image.open(test_image_path)
