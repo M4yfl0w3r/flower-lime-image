@@ -4,6 +4,6 @@ Implementation of LIME (Local Interpretable Model-Agnostic Explanations) for ima
 
 Example
 
-![](assets/explanation.png)
+![](assets/expl.png)
 
 Images: https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset

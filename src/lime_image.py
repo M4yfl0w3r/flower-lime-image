@@ -137,7 +137,7 @@ class ImageExplainer:
         pl.figure()
         pl.imshow(self.explanation)
         pl.axis('off')
-        pl.savefig('../assets/explanation.png', bbox_inches = 'tight')
+        pl.savefig('../assets/expl.png', bbox_inches = 'tight')
         pl.close()
 
     def show_superpixels_boundaries(self, superpixels: np.ndarray) -> None:
